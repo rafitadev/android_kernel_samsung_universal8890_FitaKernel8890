@@ -2549,6 +2549,22 @@ static int exynos_mp_cpufreq_parse_dt(struct device_node *np, cluster_type cl)
 	ptr->freq_table[ptr->max_idx_num].driver_data = ptr->max_idx_num;
 	ptr->freq_table[ptr->max_idx_num].frequency = CPUFREQ_TABLE_END;
 
+#ifdef CONFIG_EXYNOS8890_BIG_OC_2P8
+	if (cl == CL_ONE && of_machine_is_compatible("samsung,exynos8890")) {
+		for (i = 0; i < ptr->max_idx_num; i++) {
+			if (ptr->freq_table[i].frequency == 2800000) {
+				if (ptr->max_support_idx > i)
+					ptr->max_support_idx = i;
+				if (ptr->boot_cpu_max_qos > 2800000)
+					ptr->boot_cpu_max_qos = 2800000;
+				if (ptr->boost_freq > 2800000)
+					ptr->boost_freq = 2800000;
+				break;
+			}
+		}
+	}
+#endif
+
 	return 0;
 }
 
