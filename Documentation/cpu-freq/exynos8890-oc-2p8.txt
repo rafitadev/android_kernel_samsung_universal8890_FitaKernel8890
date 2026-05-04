@@ -1,0 +1,41 @@
+Exynos8890 Optional 2.8GHz big-cluster OC
+=========================================
+
+Overview
+--------
+This kernel tree already ships Exynos8890 CL1 (big/Mongoose) DVFS entries above
+stock levels, including 2.8GHz, in the cpufreq DT table. The runtime limit is
+kept conservative by default through cl1_max_support_idx in DT.
+
+This document describes the optional, safer-by-default unlock path to 2.8GHz:
+
+* Default behavior (recommended for daily stability/boot safety): unchanged.
+* Optional behavior: allow CL1 ceiling to reach 2.8GHz when
+  CONFIG_EXYNOS8890_BIG_OC_2P8=y.
+
+Supported targets
+-----------------
+Applies only to boards booting with machine compatible:
+
+* "samsung,exynos8890"
+
+That includes universal8890 devices such as Galaxy S7/S7 edge and
+Grace/Note-family variants in this tree, while leaving non-8890 platforms
+untouched.
+
+How it works
+------------
+When enabled, the exynos-mp-cpufreq driver:
+
+1) Searches CL1 frequency table for 2800000 KHz.
+2) Raises effective CL1 max support ceiling up to that level.
+3) Clamps boot/max QoS boost values not to exceed 2.8GHz.
+
+If 2.8GHz is not present in the parsed table, behavior remains unchanged.
+
+Safety and stability notes
+--------------------------
+* This is an overclock and may not be stable on all bins/boards/thermal states.
+* Thermal throttling, ASV limits, and runtime QoS can still reduce effective
+  frequency under load.
+* Keep default disabled unless your device is validated for 2.8GHz stability.

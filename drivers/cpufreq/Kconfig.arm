@@ -53,6 +53,15 @@ config EXYNOS_BIG_FREQ_BOOST
 	default n
 	depends on ARM_EXYNOS_MP_CPUFREQ && SCHED_HMP
 
+
+config EXYNOS8890_BIG_OC_2P8
+	bool "Enable Exynos8890 big-cluster 2.8GHz OC ceiling"
+	default n
+	depends on ARM_EXYNOS_MP_CPUFREQ
+	help
+	  Enables an optional 2.8GHz ceiling for Exynos8890 Mongoose cluster
+	  (CL1). Disabled by default for conservative boot/stability behavior.
+
 config EXYNOS_DUAL_GOV_PARAMS_SUPPORT
 	bool "Dual governor parameter support on interactive governor"
 	default n
