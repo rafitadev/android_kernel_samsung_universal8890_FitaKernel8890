@@ -1,0 +1,1 @@
+obj-$(CONFIG_MALI_MIDGARD_R30P0) += r30p0/
