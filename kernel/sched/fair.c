@@ -6270,6 +6270,20 @@ wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se)
 		return -1;
 
 	gran = wakeup_gran(curr, se);
+#ifdef CONFIG_SCHED_BORE
+	/*
+	 * BORE-style burst response: once the current entity has consumed a
+	 * long uninterrupted CPU burst, reduce the wakeup preemption margin so
+	 * shorter interactive bursts do not sit behind CPU-bound work. Keep a
+	 * small floor to avoid pathological over-preemption.
+	 */
+	if (curr->sum_exec_runtime - curr->prev_sum_exec_runtime >
+			sysctl_sched_min_granularity)
+		gran = max_t(s64, gran >> 1, 100000);
+	if (curr->sum_exec_runtime - curr->prev_sum_exec_runtime >
+			sysctl_sched_latency)
+		gran = max_t(s64, gran >> 1, 100000);
+#endif
 	if (vdiff > gran)
 		return 1;
 

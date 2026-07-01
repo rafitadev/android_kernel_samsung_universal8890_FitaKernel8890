@@ -16,6 +16,9 @@
 #include <linux/pm_qos.h>
 #include <linux/suspend.h>
 
+#define EXYNOS_HOTPLUG_MIN_ONLINE_CPUS \
+	min_t(unsigned int, CONFIG_EXYNOS_HOTPLUG_MIN_ONLINE, NR_CPUS)
+
 static int cpu_hotplug_in(const struct cpumask *mask)
 {
 	int cpu, ret = 0;
@@ -144,6 +147,8 @@ static struct cpumask create_cpumask(void)
 
 	online_cpu_min = min(pm_qos_request(PM_QOS_CPU_ONLINE_MIN), nr_cpu_ids);
 	online_cpu_max = min(pm_qos_request(PM_QOS_CPU_ONLINE_MAX), nr_cpu_ids);
+	online_cpu_min = max_t(int, online_cpu_min,
+			       EXYNOS_HOTPLUG_MIN_ONLINE_CPUS);
 
 	cpumask_clear(&mask);
 
@@ -308,6 +313,8 @@ static ssize_t show_control_online_cpus(struct kobject *kobj,
 	count += snprintf(&buf[count], 40, "cpu online count(min/max) : %u/%u\n",
 					pm_qos_request(PM_QOS_CPU_ONLINE_MIN),
 					pm_qos_request(PM_QOS_CPU_ONLINE_MAX));
+	count += snprintf(&buf[count], 40, "enforced minimum online cpu : %u\n",
+					EXYNOS_HOTPLUG_MIN_ONLINE_CPUS);
 
 	return count;
 }
@@ -322,10 +329,11 @@ static ssize_t store_control_online_cpus(struct kobject *kobj,
 		return -EINVAL;
 
 	/*
-	 * "min" and "max" has the number of online cpus,
-	 * so it must be bigger than 0.
+	 * "min" and "max" have the number of online CPUs. Keep the platform
+	 * latency floor online unless thermal PM QoS clamps the maximum.
 	 */
-	if (min <= 0 || max <= 0)
+	if (min < EXYNOS_HOTPLUG_MIN_ONLINE_CPUS ||
+			max < EXYNOS_HOTPLUG_MIN_ONLINE_CPUS)
 		return -EINVAL;
 
 	pm_qos_update_request(&user_max_cpu_hotplug_request, max);
@@ -362,7 +370,7 @@ static ssize_t store_##type##_online_cpu(struct kobject *kobj,		\
 	if (!sscanf(buf, "%d", &input))					\
 		return -EINVAL;						\
 									\
-	if (input <= 0 || input > NR_CPUS)							\
+	if (input < EXYNOS_HOTPLUG_MIN_ONLINE_CPUS || input > NR_CPUS)	\
 		return -EINVAL;						\
 									\
 	pm_qos_update_request(&user_##type##_cpu_hotplug_request,	\
@@ -470,7 +478,7 @@ static void __init cpu_hotplug_pm_qos_init(void)
 
 	/* Add PM QoS for sysfs node */
 	pm_qos_add_request(&user_min_cpu_hotplug_request,
-		PM_QOS_CPU_ONLINE_MIN, PM_QOS_CPU_ONLINE_MIN_DEFAULT_VALUE);
+		PM_QOS_CPU_ONLINE_MIN, EXYNOS_HOTPLUG_MIN_ONLINE_CPUS);
 	pm_qos_add_request(&user_max_cpu_hotplug_request,
 		PM_QOS_CPU_ONLINE_MAX, PM_QOS_CPU_ONLINE_MAX_DEFAULT_VALUE);
 }

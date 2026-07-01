@@ -40,6 +40,18 @@ config EXYNOS_CONTENT_PATH_PROTECTION
 config EXYNOS_HOTPLUG_GOVERNOR
 	bool "Enable Exynos dynamic hotplug governor"
 
+config EXYNOS_HOTPLUG_MIN_ONLINE
+	int "Minimum CPUs kept online by Exynos hotplug"
+	depends on EXYNOS_HOTPLUG_GOVERNOR
+	range 1 NR_CPUS
+	default 8 if SOC_EXYNOS8890
+	default 1
+	help
+	  Set the platform floor used by the Exynos hotplug controller when
+	  translating PM QoS online-CPU requests into the target online mask.
+	  Exynos 8890 devices use all eight CPUs as the default latency floor,
+	  while thermal PM QoS maximum requests can still clamp the online mask.
+
 config SCHED_HP_EVENT
 	bool "Gathers scheduler events to decide hotplug in/out"
 	depends on EXYNOS_HOTPLUG_GOVERNOR

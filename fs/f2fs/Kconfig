@@ -85,6 +85,16 @@ config F2FS_FS_ENCRYPTION
 	  efficient since it avoids caching the encrypted and
 	  decrypted pages in the page cache.
 
+config F2FS_DEFAULT_STRICT_FSYNC
+	bool "Default to strict F2FS fsync semantics"
+	depends on F2FS_FS
+	default y
+	help
+	  Use strict fsync semantics by default so directory-entry recovery is
+	  checkpointed like ext4 when needed. This improves userdata resilience
+	  after sudden power loss while keeping the fsync_mode= mount option
+	  available for devices that deliberately choose posix or nobarrier.
+
 config F2FS_IO_TRACE
 	bool "F2FS IO tracer"
 	depends on F2FS_FS
