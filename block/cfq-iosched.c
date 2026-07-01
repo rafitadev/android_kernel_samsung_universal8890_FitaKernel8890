@@ -33,7 +33,8 @@ static const int cfq_slice_async_rq = 2;
 /* Explicitly set cfq_slice_idle to 0 */
 static int cfq_slice_idle = 0;
 /* static int cfq_slice_idle = HZ / 125; */
-static int cfq_group_idle = HZ / 125;
+/* Keep CFQ in IOPS-oriented mode on flash storage when it is selected. */
+static int cfq_group_idle;
 static const int cfq_target_latency = HZ * 3/10; /* 300 ms */
 static const int cfq_hist_divisor = 4;
 static int cfq_max_async_dispatch = 4;

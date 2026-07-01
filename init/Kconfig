@@ -1160,6 +1160,15 @@ config RT_GROUP_SCHED
 
 endif #CGROUP_SCHED
 
+config SCHED_BORE
+	bool "BORE-style burst response for CFS"
+	depends on FAIR_GROUP_SCHED || !CGROUP_SCHED
+	help
+	  Bias CFS wakeup preemption toward latency-sensitive tasks when the
+	  currently running entity has consumed a long uninterrupted CPU burst.
+	  This keeps Android UI and binder-heavy workloads responsive without
+	  replacing the existing Exynos HMP scheduler.
+
 config BLK_CGROUP
 	bool "Block IO controller"
 	depends on BLOCK
